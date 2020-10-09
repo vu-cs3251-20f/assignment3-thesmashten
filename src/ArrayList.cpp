@@ -6,21 +6,9 @@
 
 #include <cstdint>
 
-
-
-/**
- * Creates an ArrayList of size 0.
- */
 template <typename T>
 ArrayList<T> :: ArrayList() : mArray(), mSize(0), mCapacity(0) {}
 
-
-/**
- * Creates an ArrayList of the provided size and fills it with the provided
- * value - default to the default value of the template type.
- * @param size size of the ArrayList to create
- * @param value value used to fill the ArrayList
- */
 template <typename T>
 ArrayList<T> :: ArrayList(const uint32_t size, const T& value) :
     mArray(new T [size]), mSize(size), mCapacity(size){
@@ -29,15 +17,13 @@ ArrayList<T> :: ArrayList(const uint32_t size, const T& value) :
     }
 }
 
-
-/**
- * Creates a deep copy of the provided ArrayList
- * @param src ArrayList to copy
- */
 template <typename T>
 ArrayList<T> :: ArrayList(const ArrayList<T> &src) : mArray(new T[src.size()]),
     mSize(src.size()), mCapacity(src.mCapacity){
-    std :: copy(src.begin(), src.end(), begin());
+
+    for (uint32_t i = 0; i < mCapacity; ++i){
+        mArray[i] = src.mArray[i];
+    }
 }
 
 
@@ -69,7 +55,7 @@ ArrayList<T> &ArrayList<T> ::operator=(const ArrayList<T>& rhs) {
  */
 template <typename T>
 uint32_t ArrayList<T> :: add(const T& value){
-    return add(0, value);
+    return add(mSize, value);
 }
 
 /**
@@ -84,27 +70,44 @@ uint32_t ArrayList<T> :: add(const T& value){
  */
 template <typename T>
 uint32_t ArrayList<T> :: add(const uint32_t index, const T& value){
-    if (mSize == 0){
-        ScopedArray<T> tmp(new T[1]);
-        mArray.swap(tmp);
-        ++mCapacity;
+    //first case: if mCapacity = 0
+    uint32_t newCap = mCapacity;
+    if (mCapacity == 0){
+        ++newCap;
+    }else if(mSize >= mCapacity){
+        newCap *= 2;
     }
-    else if (index >= mCapacity){
-        uint32_t newCap = mCapacity * 2;
-        while (index > newCap){
-            newCap *= 2;
+    while (index >= newCap) {
+        newCap *= 2;
+    }
+
+    //second case: index < mySize
+    ScopedArray<T> tmp(new T[newCap]);
+    if(index < mSize){
+        for (uint32_t i = index; i < mSize; ++i){
+            tmp[i + 1] = mArray[i];
         }
-        ScopedArray<T> tmp(new T[newCap]);
-        for (uint32_t i = 0; i < index; ++i){
+        for(uint32_t i = 0; i < index; ++i){
             tmp[i] = mArray[i];
         }
-        for (uint32_t i = mSize; i < index; ++i){
-            tmp[i] = value;
+    }
+
+    //third case: index > mCapacity
+    else{
+        for(uint32_t i = 0; i < mSize; ++i){
+            tmp[i] = mArray[i];
+        }
+        for(uint32_t i = mSize; i < index; ++i){
+            tmp[i] = T();
             ++mSize;
         }
-        mArray.swap(tmp);
-        mCapacity = newCap;
     }
+
+    // increment size, swap mArray with tmp for exception safety
+    mArray.swap(tmp);
+    ++mSize;
+    mCapacity = newCap;
+    mArray[index] = value;
     return mCapacity;
 }
 
@@ -113,9 +116,7 @@ uint32_t ArrayList<T> :: add(const uint32_t index, const T& value){
  */
 template <typename T>
 void ArrayList<T> :: clear(){
-    for (uint32_t i = 0; i < mCapacity; ++i){
-        mArray[i] = T();
-    }
+    mArray.reset(nullptr);
     mSize = mCapacity = 0;
 }
 
@@ -130,12 +131,13 @@ void ArrayList<T> :: clear(){
 
 template <typename T>
 T ArrayList<T> :: remove(const uint32_t index){
-    if (index > mCapacity){
-        throw std::out_of_range("Out of range.");
+    if (index >= mSize){
+        throw std::out_of_range(std::to_string(index));
     }
-    T tmp (mArray[index]);
-    for (uint32_t i = index; i < mCapacity - 1; ++i){
-        mArray[i + 1] = mArray[i];
+    //make a tmp variable to hold what is removed by shuffling down
+    T tmp(mArray[index]);
+    for (uint32_t i = index; i < mSize - 1; ++i) {
+        mArray[i] = mArray[i + 1]; // no delete needed because shuffling down removes
     }
     --mSize;
     return tmp;
@@ -151,7 +153,7 @@ T ArrayList<T> :: remove(const uint32_t index){
 template <typename T>
 void ArrayList<T> :: set(const uint32_t index, const T& value){
     if (index >= mCapacity){
-        throw std::out_of_range("Out of range.");
+        throw std::out_of_range(std::to_string(index));
     }
     mArray[index] = value;
 }
@@ -244,14 +246,12 @@ ArrayListIterator<T> ArrayList<T> ::begin(){
  */
 template <typename T>
 ArrayListIterator<T> ArrayList<T>::end() {
-    T* ptr = mArray.get() + mSize;
-    return ArrayListIterator<T>(ptr);
+    return ArrayListIterator<T>(mArray.get() + mSize);
 }
 
 /**
- * Preincrement operator.
+ * Preincrement operatorb].
  * @return *this after the increment.
  */
-template <typename T>
-ArrayListConstIterator<T>
+
 #endif

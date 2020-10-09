@@ -91,6 +91,7 @@ TEST_F(ArrayListTest, SizeAndAdd)
 // Add and get elements in the array
 TEST_F(ArrayListTest, AddAndGet)
 {
+    std :: cout << "heello";
     ArrayList<uint32_t> a;
     for (uint32_t i = 0; i < 4000; i += 2)
         a.add(i);

@@ -60,9 +60,9 @@ public:
 
 
     /**
-    * Predecrement operator.
-    * @return *this after the decrement.
-    */
+ * Predecrement operator.
+ * @return *this after the decrement.
+ */
     ArrayListIterator<T>& operator--();
 
     /**
