@@ -58,11 +58,10 @@ public:
      */
     ArrayListIterator<T>& operator++();
 
-
     /**
- * Predecrement operator.
- * @return *this after the decrement.
- */
+     * Predecrement operator.
+     * @return *this after the decrement.
+     */
     ArrayListIterator<T>& operator--();
 
     /**
@@ -70,7 +69,6 @@ public:
      * @return The iterator before the increment.
      */
     ArrayListIterator<T> operator++(int32_t);
-
 
     /**
      * Postdecrement operator.
