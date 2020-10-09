@@ -5,16 +5,14 @@
 #define ARRAYLIST_CPP
 
 #include <cstdint>
-#include <memory>
-#include <algorithm>
-#include <iostream>
+
 
 
 /**
  * Creates an ArrayList of size 0.
  */
 template <typename T>
-ArrayList<T> :: ArrayList() : mArray(nullptr), mSize(0), mCapacity(0) {}
+ArrayList<T> :: ArrayList() : mArray(), mSize(0), mCapacity(0) {}
 
 
 /**
@@ -230,14 +228,30 @@ const T& ArrayList<T> :: operator[](const uint32_t index) const{
     return mArray[index];
 }
 
+/**
+ * Returns const iterator to the beginning; in this case, a random access
+ * iterator
+ * @return an const iterator to the beginning of this ArrayList.
+ */
 template <typename T>
 ArrayListIterator<T> ArrayList<T> ::begin(){
     return ArrayListIterator<T>(mArray.get());
 }
 
+/**
+ * Returns the past-the-end iterator of this ArrayList.
+ * @return a past-the-end iterator of this ArrayList.
+ */
 template <typename T>
 ArrayListIterator<T> ArrayList<T>::end() {
-    return ArrayListIterator<T>(mArray.get() + mSize);
+    T* ptr = mArray.get() + mSize;
+    return ArrayListIterator<T>(ptr);
 }
 
+/**
+ * Preincrement operator.
+ * @return *this after the increment.
+ */
+template <typename T>
+ArrayListConstIterator<T>
 #endif
